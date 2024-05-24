@@ -43,3 +43,15 @@ Open a browser and go to URL
 http://<IP>:5000                            => Welcome
 http://<IP>:5000/how%20are%20you            => I am good, how about you?
 ```
+
+## 5. Docker commands:
+
+```bash
+docker build -t myflaskapp:0.1 .
+docker run -p 8080:8080 myflaskapp:0.1
+
+docker login
+
+docker tag myflaskapp:0.1 maziar/myflaskapp:0.1
+docker push maziar/myflaskapp:0.1
+```
