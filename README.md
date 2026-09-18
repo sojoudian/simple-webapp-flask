@@ -1,57 +1,100 @@
-# Simple Web Application
+# Simple Web Application — CLO835
 
-This is a simple web application using [Python Flask](http://flask.pocoo.org/).
-  
-  Below are the steps required to get this working on a base linux system.
-  
-  - **Install all required dependencies**
-  - **Install and Configure Web Server**
-  - **Start Web Server**
-   
-## 1. Install all required dependencies
-  
-  Python and its dependencies
-  ```bash
-  apt-get install -y python3 python3-setuptools python3-dev build-essential python3-pip default-libmysqlclient-dev
-  ```
-If you are running your code on a macOS you can simply run the following code:
-```bash
-python3 -m venv env && source env/bin/activate&& pip install flask
-```
-   
-## 2. Install and Configure Web Server
+A small [Flask](https://flask.palletsprojects.com/) application. It exists to show
+the same deployment performed two ways: **by hand on a Linux machine**, and
+**inside a container image**.
 
-Install Python Flask dependency
-```bash
-pip3 install flask
-```
+| Item | Version |
+|---|---|
+| Base image | Ubuntu 26.04 LTS (Resolute Raccoon) |
+| Python | 3.14 |
+| Flask | 3.1.3 (pinned in `requirements.txt`) |
 
-- Copy `app.py` or download it from a source repository
-- Configure database credentials and parameters 
+## The routes
 
-## 3. Start Web Server
+| Path | Answer |
+|---|---|
+| `/` | `Welcome CLO835!` |
+| `/how%20are%20you` | `I am good, how about you?` |
 
-Start web server
-```bash
-FLASK_APP=app.py flask run --host=0.0.0.0
-```
+## The port
 
-## 4. Test
+One environment variable sets the port. The code never changes.
 
-Open a browser and go to URL
-```
-http://<IP>:5000                            => Welcome
-http://<IP>:5000/how%20are%20you            => I am good, how about you?
-```
+| How you run it | Port | Reason |
+|---|--:|---|
+| `python3 app.py` | **8080** | The default in `app.py`. |
+| `docker run` | **18080** | `ENV PORT=18080` in the `Dockerfile`. |
 
-## 5. Docker commands:
+Change it at any time: `PORT=9000 python3 app.py`.
+
+## 1. Run it by hand (Ubuntu)
+
+Ubuntu 24.04 and later protect the system Python, so `pip3 install flask`
+fails with an `externally-managed-environment` error. A virtual environment is
+the correct answer.
 
 ```bash
-docker build -t myflaskapp:0.1 .
-docker run -p 8080:8080 myflaskapp:0.1
+sudo apt-get update -y
+sudo apt-get install -y python3 python3-venv
 
+python3 -m venv venv
+source venv/bin/activate
+
+pip install -r requirements.txt
+python3 app.py                       # serves on 8080
+```
+
+Test it.
+
+```bash
+curl http://localhost:8080/          # Welcome CLO835!
+```
+
+On macOS, `python3` and `pip` are already present.
+
+```bash
+python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt
+python3 app.py
+```
+
+## 2. Run it as a container
+
+Read the `Dockerfile` first. Every line repeats one step from section 1.
+
+```bash
+docker build -t simple-webapp-flask:v1 .
+docker run -d --name webapp -p 18080:18080 simple-webapp-flask:v1
+
+curl http://localhost:18080/         # Welcome CLO835!
+docker logs webapp
+```
+
+Publish it.
+
+```bash
 docker login
-
-docker tag myflaskapp:0.1 maziar/myflaskapp:0.1
-docker push maziar/myflaskapp:0.1
+docker tag simple-webapp-flask:v1 <user>/simple-webapp-flask:v1
+docker push <user>/simple-webapp-flask:v1
 ```
+
+Any computer with Docker now repeats all of section 1 with one command.
+
+```bash
+docker run -d -p 18080:18080 <user>/simple-webapp-flask:v1
+```
+
+Clean up.
+
+```bash
+docker rm -f webapp
+```
+
+## 3. The point
+
+| | By hand | As a container |
+|---|---|---|
+| Steps to repeat on a new machine | 6 | 1 |
+| Moves to another computer | No | Yes |
+| Leaves files behind after you stop it | Yes | No |
+| Breaks on a different Ubuntu version | Yes | No |
