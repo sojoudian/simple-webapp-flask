@@ -19,14 +19,8 @@ the same deployment performed two ways: **by hand on a Linux machine**, and
 
 ## The port
 
-One environment variable sets the port. The code never changes.
-
-| How you run it | Port | Reason |
-|---|--:|---|
-| `python3 app.py` | **8080** | The default in `app.py`. |
-| `docker run` | **18080** | `ENV PORT=18080` in the `Dockerfile`. |
-
-Change it at any time: `PORT=9000 python3 app.py`.
+8080, by hand and in a container. Change it with one variable:
+`PORT=9000 python3 app.py`.
 
 ## 1. Run it by hand (Ubuntu)
 
@@ -64,9 +58,9 @@ Read the `Dockerfile` first. Every line repeats one step from section 1.
 
 ```bash
 docker build -t simple-webapp-flask:v1 .
-docker run -d --name webapp -p 18080:18080 simple-webapp-flask:v1
+docker run -d --name webapp -p 8080:8080 simple-webapp-flask:v1
 
-curl http://localhost:18080/         # Welcome CLO835!
+curl http://localhost:8080/         # Welcome CLO835!
 docker logs webapp
 ```
 
@@ -81,7 +75,7 @@ docker push <user>/simple-webapp-flask:v1
 Any computer with Docker now repeats all of section 1 with one command.
 
 ```bash
-docker run -d -p 18080:18080 <user>/simple-webapp-flask:v1
+docker run -d -p 8080:8080 <user>/simple-webapp-flask:v1
 ```
 
 Clean up.

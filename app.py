@@ -11,8 +11,6 @@ def hello():
     return 'I am good, how about you?'
 
 if __name__ == "__main__":
-    # PORT lets the container pick a different port without a code change.
-    # Manual run  (python3 app.py)  -> 8080, the default.
-    # Container   (docker run)      -> 18080, set by ENV PORT in the Dockerfile.
+    # PORT overrides the default without a code change.
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
